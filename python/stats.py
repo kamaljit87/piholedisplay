@@ -29,10 +29,10 @@ from __future__ import unicode_literals
 
 import epd2in13_V4
 import time
-import Image
-import ImageDraw
-import ImageFont
 import PIL
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
 from textwrap import dedent
 import requests
 import subprocess
@@ -42,7 +42,7 @@ from time import gmtime, strftime
 api_url = 'http://localhost/admin/api.php'
 
 def deep_reset(epd):
-    print "resetting to white..."
+    print ("resetting to white...")
     white_screen = Image.new('1', (epd2in13_V4.EPD_WIDTH, epd2in13_V4.EPD_HEIGHT), 255)
     epd.display_frame(epd.get_frame_buffer(white_screen), epd.get_frame_buffer(white_screen))
     epd.delay_ms(1000)
@@ -51,7 +51,7 @@ def update(epd):
 
     # EPD 2 inch 13 b HAT is rotated 90 clockwize and does not support partial update
     # But has amazing 2 colors
-    print "drawing status"
+    print ("drawing status")
     width = epd2in13_V4.EPD_HEIGHT
     height = epd2in13_V4.EPD_WIDTH
     top = 2
@@ -64,8 +64,8 @@ def update(epd):
         frame_black = Image.new('1', (width, height), 255)
         frame_red = Image.new('1', (width, height), 255)
 
-        pihole_logo_top = Image.open('pihole-bw-80-top.bmp')
-        pihole_logo_bottom = Image.open('pihole-bw-80-bottom.bmp')
+        pihole_logo_top = Image.open('./pihole-bw-80-top.bmp')
+        pihole_logo_bottom = Image.open('./pihole-bw-80-bottom.bmp')
         # pihole_logo = Image.open('monocolo    r.bmp')
 
         font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', 10)
@@ -80,17 +80,23 @@ def update(epd):
         draw_black.rectangle((0, 0, width, height), outline=0, fill=None)
 
         ip = subprocess.check_output( "hostname -I | cut -d' ' -f1", shell=True).strip()
-        print "ip:", ip
-        host = subprocess.check_output("hostname", shell=True).strip() + ".local"
-        print "host:", host
+        print ("ip:", ip)
+       # host = subprocess.check_output("hostname", shell=True).strip() + ".local"
+        host = subprocess.check_output("hostname", shell=True).strip().decode('utf-8') + ".local"
+        print ("host:", host)
         mem_usage = subprocess.check_output(dedent("""
-            free -m | awk 'NR==2{printf \"Mem: %s/%sMB %.2f%%\", $3,$2,$3*100/$2 }'
-            """).strip(), shell=True).replace("Mem: ", "")
-        print "memory usage:", mem_usage
+    free -m | awk 'NR==2{printf "Mem: %s/%sMB %.2f%%", $3,$2,$3*100/$2 }'
+    """).strip(), shell=True)
+
+        mem_usage = mem_usage.decode('utf-8').replace("Mem: ", "")
+        print ("memory usage:", mem_usage)
         disk = subprocess.check_output(dedent("""
-            df -h | awk '$NF==\"/\"{printf \"Disk: %d/%dGB %s\", $3,$2,$5}'
-            """).strip(), shell=True).replace("Disk: ", "")
-        print "disk:", disk
+    df -h | awk '$NF=="/"{printf "Disk: %d/%dGB %s", $3,$2,$5}'
+    """), shell=True)
+
+# Decode the byte output to string and replace "Disk: "
+        disk = disk.decode('utf-8').replace("Disk: ", "")
+        print ("disk:", disk)
 
         try:
             r = requests.get(api_url)
@@ -129,21 +135,21 @@ def update(epd):
         epd.display_frame(epd.get_frame_buffer(frame_black.transpose(PIL.Image.ROTATE_90)),
                           epd.get_frame_buffer(frame_red.transpose(PIL.Image.ROTATE_90)))
         sleep_sec = 10 * 60
-        print "sleeping {0} sec ({1} min) at {1}".format(sleep_sec, sleep_sec / 60,
-                                                         strftime("%H:%M", gmtime()))
+        print ("sleeping {0} sec ({1} min) at {1}".format(sleep_sec, sleep_sec / 60,
+                                                         strftime("%H:%M", gmtime())))
         epd.sleep()
         epd.delay_ms(sleep_sec * 1000)
         # awakening the display
         epd.init()
 
 def main():
-    print "initing screen..."
+    print ("initing screen...")
     epd = epd2in13_V4.EPD()
     epd.init()
     try:
         update(epd)
     finally:
-        print "sleeping epd before leaving"
+        print ("sleeping epd before leaving")
         epd.sleep()
 
 if __name__ == '__main__':
