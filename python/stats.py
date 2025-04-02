@@ -60,6 +60,10 @@ def update(epd):
     xt = 70
     xc = 120
     xc2 = 164
+    ROTATE_0 = 0
+    ROTATE_90 = 1
+    ROTATE_180 = 2
+    ROTATE_270 = 3
 
     while True:
         frame_black = Image.new('1', (width, height), 255)
@@ -101,7 +105,7 @@ def update(epd):
             clients = data['unique_clients']
         except KeyError:
             time.sleep(1)
-            continue
+           # continue
 
         frame_black.paste(pihole_logo_top, (-8, 2))
         frame_red.paste(pihole_logo_bottom, (-8, 2))
@@ -118,22 +122,25 @@ def update(epd):
         draw_black.text((xt, top + 45), "Disk:",  font=font_bold, fill=fill_color)
         draw_black.text((xc, top + 45),  str(disk),  font=font, fill=fill_color)
         draw_black.text((xt, top + 60), "Ads Blocked: ", font=font_bold, fill=fill_color)
-        draw_black.text((xc2, top + 60), str(adsblocked), font=font, fill=fill_color)
+#        draw_black.text((xc2, top + 60), str(adsblocked), font=font, fill=fill_color)
         draw_black.text((xt, top + 75), "Clients:", font=font_bold, fill=fill_color)
-        draw_black.text((xc2, top + 75), str(clients), font=font, fill=fill_color)
+ #       draw_black.text((xc2, top + 75), str(clients), font=font, fill=fill_color)
         draw_black.text((xt, top + 90), "DNS Queries: ", font=font_bold, fill=fill_color)
-        draw_black.text((xc2, top + 90), str(dnsqueries), font=font, fill=fill_color)
+  #      draw_black.text((xc2, top + 90), str(dnsqueries), font=font, fill=fill_color)
 
         draw_black.text((14, height - 10), u"↻: ", font=font, fill=fill_color)
         draw_black.text((24, height - 8), strftime("%H:%M", gmtime()), font=font_debug, fill=fill_color)
 
-        epd.display_frame(epd.getbuffer(frame_black.transpose(PIL.Image.ROTATE_90)),
-                          epd.getbuffer(frame_red.transpose(PIL.Image.ROTATE_90)))
-        sleep_sec = 10 * 60
+
+        
+        epd.display(epd.getbuffer(frame_black.transpose(Image.ROTATE_90)))
+        epd.display(epd.getbuffer(frame_red.transpose(Image.ROTATE_90)))
+
+        sleep_sec = 1 * 1
         print ("sleeping {0} sec ({1} min) at {1}".format(sleep_sec, sleep_sec / 60,
                                                          strftime("%H:%M", gmtime())))
         epd.sleep()
-        epd.delay_ms(sleep_sec * 1000)
+        time.sleep(sleep_sec * 1000)
         # awakening the display
         epd.init()
 
