@@ -133,8 +133,8 @@ def update(epd):
 
 
         
-        epd.display(epd.getbuffer(frame_black.transpose(Image.ROTATE_90)))
-        epd.display(epd.getbuffer(frame_red.transpose(Image.ROTATE_90)))
+        epd.display_fast(epd.getbuffer(frame_black.transpose(Image.ROTATE_90)))
+        epd.display_fast(epd.getbuffer(frame_red.transpose(Image.ROTATE_90)))
 
         sleep_sec = 1 * 1
         print ("sleeping {0} sec ({1} min) at {1}".format(sleep_sec, sleep_sec / 60,
@@ -142,12 +142,12 @@ def update(epd):
         epd.sleep()
         time.sleep(sleep_sec * 1000)
         # awakening the display
-        epd.init()
+        epd.init_fast()
 
 def main():
     print ("initing screen...")
     epd = epd2in13_V4.EPD()
-    epd.init()
+    epd.init_fast()
     epd.Clear()
     try:
         update(epd)
