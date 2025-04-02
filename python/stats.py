@@ -29,10 +29,11 @@ from __future__ import unicode_literals
 
 import epd2in13_V4
 import time
-import Image
-import ImageDraw
-import ImageFont
 import PIL
+import sys
+import requests
+import logging
+from PIL import Image, ImageDraw, ImageFont
 from textwrap import dedent
 import requests
 import subprocess
