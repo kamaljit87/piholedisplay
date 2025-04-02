@@ -27,7 +27,7 @@
  ##
 from __future__ import unicode_literals
 
-import epd2in13b
+import epd2in13_V4
 import time
 import Image
 import ImageDraw
@@ -43,8 +43,8 @@ api_url = 'http://localhost/admin/api.php'
 
 def deep_reset(epd):
     print "resetting to white..."
-    white_screen = Image.new('1', (epd2in13b.EPD_WIDTH, epd2in13b.EPD_HEIGHT), 255)
-    epd.display_frame(epd.get_frame_buffer(white_screen), epd.get_frame_buffer(white_screen))
+    white_screen = Image.new('1', (epd2in13_V4.EPD_WIDTH, epd2in13_V4.EPD_HEIGHT), 255)
+    epd.display_frame(epd.getbuffer(white_screen), epd.getbuffer(white_screen))
     epd.delay_ms(1000)
 
 def update(epd):
@@ -52,8 +52,8 @@ def update(epd):
     # EPD 2 inch 13 b HAT is rotated 90 clockwize and does not support partial update
     # But has amazing 2 colors
     print "drawing status"
-    width = epd2in13b.EPD_HEIGHT
-    height = epd2in13b.EPD_WIDTH
+    width = epd2in13_V4.EPD_HEIGHT
+    height = epd2in13_V4.EPD_WIDTH
     top = 2
     fill_color = 0
     xt = 70
@@ -126,8 +126,8 @@ def update(epd):
         draw_black.text((14, height - 10), u"↻: ", font=font, fill=fill_color)
         draw_black.text((24, height - 8), strftime("%H:%M", gmtime()), font=font_debug, fill=fill_color)
 
-        epd.display_frame(epd.get_frame_buffer(frame_black.transpose(PIL.Image.ROTATE_90)),
-                          epd.get_frame_buffer(frame_red.transpose(PIL.Image.ROTATE_90)))
+        epd.display_frame(epd.getbuffer(frame_black.transpose(PIL.Image.ROTATE_90)),
+                          epd.getbuffer(frame_red.transpose(PIL.Image.ROTATE_90)))
         sleep_sec = 10 * 60
         print "sleeping {0} sec ({1} min) at {1}".format(sleep_sec, sleep_sec / 60,
                                                          strftime("%H:%M", gmtime()))
@@ -138,7 +138,7 @@ def update(epd):
 
 def main():
     print "initing screen..."
-    epd = epd2in13b.EPD()
+    epd = epd2in13_V4.EPD()
     epd.init()
     try:
         update(epd)
