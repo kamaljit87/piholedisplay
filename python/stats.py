@@ -73,11 +73,11 @@ def update(epd):
         pihole_logo_bottom = Image.open('pihole-bw-80-bottom.bmp')
         # pihole_logo = Image.open('monocolo    r.bmp')
 
-        font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', 10)
-        font_bold = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', 11)
-        font_title = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', 11)
-        font_title_bold = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', 11)
-        font_debug = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', 8)
+        font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf', 11)
+        font_bold = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf', 12)
+        font_title = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf', 12)
+        font_title_bold = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf', 12)
+        font_debug = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf', 8)
 
         # font = ImageFont.truetype('slkscr.ttf', 15)
         draw_black = ImageDraw.Draw(frame_black)
@@ -98,8 +98,10 @@ def update(epd):
         print ("disk:", disk)
 
         try:
-            r = requests.get(api_url)
-            data = json.loads(r.text)
+            url = "http://localhost/api/auth"
+            payload = {"password": "kamal1987"}
+            response = requests.request("POST", url, json=payload, verify=False)
+            print(response.text)
             dnsqueries = data['dns_queries_today']
             adsblocked = data['ads_blocked_today']
             clients = data['unique_clients']
@@ -110,7 +112,7 @@ def update(epd):
         frame_black.paste(pihole_logo_top, (-8, 2))
         frame_red.paste(pihole_logo_bottom, (-8, 2))
         draw_red = ImageDraw.Draw(frame_red)
-        draw_red.text((10, height - 21), "Pi", font=font_title, fill=fill_color)
+        draw_red.text((10, height - 21), "Pi", font=font_title_bold, fill=fill_color)
         draw_red.text((23, height - 21), "-hole", font=font_title_bold, fill=fill_color)
 
         draw_black.text((xt, top + 0), "HOST: ", font=font_bold, fill=fill_color)
@@ -133,8 +135,7 @@ def update(epd):
 
 
         
-        epd.display_fast(epd.getbuffer(frame_black.transpose(Image.ROTATE_90)))
-        epd.display_fast(epd.getbuffer(frame_red.transpose(Image.ROTATE_90)))
+        epd.display(epd.getbuffer(frame_black.transpose(Image.ROTATE_90)),epd.getbuffer(frame_red.transpose(Image.ROTATE_90)))
 
         sleep_sec = 1 * 1
         print ("sleeping {0} sec ({1} min) at {1}".format(sleep_sec, sleep_sec / 60,
@@ -142,12 +143,12 @@ def update(epd):
         epd.sleep()
         time.sleep(sleep_sec * 1000)
         # awakening the display
-        epd.init_fast()
+        epd.init()
 
 def main():
     print ("initing screen...")
     epd = epd2in13b_V4.EPD()
-    epd.init_fast()
+    epd.init()
     epd.Clear()
     try:
         update(epd)
