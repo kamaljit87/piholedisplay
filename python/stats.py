@@ -82,7 +82,7 @@ def update(epd):
 
         ip = subprocess.check_output( "hostname -I | cut -d' ' -f1", shell=True).strip()
         print ("ip:", ip)
-        host = subprocess.check_output("hostname", shell=True).strip() + ".local"
+        host = subprocess.check_output("hostname", shell=True).strip().decode() + ".local"
         print ("host:", host)
         mem_usage = subprocess.check_output(dedent("""
             free -m | awk 'NR==2{printf \"Mem: %s/%sMB %.2f%%\", $3,$2,$3*100/$2 }'
@@ -141,6 +141,7 @@ def main():
     print ("initing screen...")
     epd = epd2in13_V4.EPD()
     epd.init()
+    epd.clear()
     try:
         update(epd)
     finally:
