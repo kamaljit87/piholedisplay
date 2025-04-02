@@ -141,7 +141,7 @@ def main():
     print ("initing screen...")
     epd = epd2in13_V4.EPD()
     epd.init()
-    epd.clear()
+    epd.Clear()
     try:
         update(epd)
     finally:
