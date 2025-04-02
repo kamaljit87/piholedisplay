@@ -85,12 +85,12 @@ def update(epd):
         host = subprocess.check_output("hostname", shell=True).strip().decode() + ".local"
         print ("host:", host)
         mem_usage = subprocess.check_output(dedent("""
-            free -m | awk 'NR==2{printf \"Mem: %s/%sMB %.2f%%\", $3,$2,$3*100/$2 }'
-            """).strip(), shell=True).replace("Mem: ", "")
+        free -m | awk 'NR==2{printf "Mem: %s/%sMB %.2f%%", $3,$2,$3*100/$2 }'
+        """).strip(), shell=True).decode().replace("Mem: ", "")
         print ("memory usage:", mem_usage)
         disk = subprocess.check_output(dedent("""
             df -h | awk '$NF==\"/\"{printf \"Disk: %d/%dGB %s\", $3,$2,$5}'
-            """).strip(), shell=True).replace("Disk: ", "")
+            """).strip(), shell=True).decode().replace("Disk: ", "")
         print ("disk:", disk)
 
         try:
