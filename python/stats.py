@@ -27,7 +27,7 @@
  ##
 from __future__ import unicode_literals
 
-import epd2in13_V4
+import epd2in13b_V4
 import time
 import PIL
 import sys
@@ -44,7 +44,7 @@ api_url = 'http://localhost/admin/api.php'
 
 def deep_reset(epd):
     print ("resetting to white...")
-    white_screen = Image.new('1', (epd2in13_V4.EPD_WIDTH, epd2in13_V4.EPD_HEIGHT), 255)
+    white_screen = Image.new('1', (epd2in13b_V4.EPD_WIDTH, epd2in13b_V4.EPD_HEIGHT), 255)
     epd.display_frame(epd.getbuffer(white_screen), epd.getbuffer(white_screen))
     epd.delay_ms(1000)
 
@@ -53,8 +53,8 @@ def update(epd):
     # EPD 2 inch 13 b HAT is rotated 90 clockwize and does not support partial update
     # But has amazing 2 colors
     print ("drawing status")
-    width = epd2in13_V4.EPD_HEIGHT
-    height = epd2in13_V4.EPD_WIDTH
+    width = epd2in13b_V4.EPD_HEIGHT
+    height = epd2in13b_V4.EPD_WIDTH
     top = 2
     fill_color = 0
     xt = 70
@@ -146,7 +146,7 @@ def update(epd):
 
 def main():
     print ("initing screen...")
-    epd = epd2in13_V4.EPD()
+    epd = epd2in13b_V4.EPD()
     epd.init_fast()
     epd.Clear()
     try:
