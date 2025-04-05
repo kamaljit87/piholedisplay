@@ -40,7 +40,7 @@ import subprocess
 import json
 from time import gmtime, strftime
 
-api_url = 'http://localhost/admin/api.php'
+#api_url = 'http://localhost/admin/api.php'
 
 def deep_reset(epd):
     print ("resetting to white...")
@@ -86,7 +86,7 @@ def update(epd):
 
         ip = subprocess.check_output( "hostname -I | cut -d' ' -f1", shell=True).strip()
         print ("ip:", ip)
-        host = subprocess.check_output("hostname", shell=True).strip().decode() + ".local"
+        host = subprocess.check_output("hostname", shell=True).strip().decode()
         print ("host:", host)
         mem_usage = subprocess.check_output(dedent("""
         free -m | awk 'NR==2{printf "Mem: %s/%sMB %.2f%%", $3,$2,$3*100/$2 }'
@@ -98,13 +98,46 @@ def update(epd):
         print ("disk:", disk)
 
         try:
-            url = "http://localhost/api/auth"
-            payload = {"password": "kamal1987"}
-            response = requests.request("POST", url, json=payload, verify=False)
-            print(response.text)
-            dnsqueries = data['dns_queries_today']
-            adsblocked = data['ads_blocked_today']
-            clients = data['unique_clients']
+            with open("secrets.txt", "r") as file:
+                APP_PASSWORD = file.read().strip()
+
+            # Disable SSL warnings (only for self-signed certs in dev environments)
+            requests.packages.urllib3.disable_warnings()
+
+        # Step 1: Authenticate and get session SID
+            auth_response = requests.post(
+            "http://localhost/api/auth",
+            json={"password": APP_PASSWORD},
+            verify=False
+            )
+
+            sid = auth_response.json().get("session", {}).get("sid")
+
+            if sid:
+                # Step 2: Get stats summary
+                stats_response = requests.get(
+                f"http://localhost/api/stats/summary?sid={sid}",
+                verify=False
+                )
+                stats_data = stats_response.json()
+
+                # Step 3: Extract desired values
+                blocked = stats_data.get("blocked")
+                active_clients = stats_data.get("clients", {}).get("active")
+                total_queries = stats_data.get("queries", {}).get("total")
+
+                # Print or use the variables
+                print(f"Blocked domains: {blocked}")
+                print(f"Active clients: {active_clients}")
+                print(f"Total queries: {total_queries}")
+
+                # Step 4: Logout
+                logout_response = requests.delete(
+                f"http://localhost/api/auth?sid={sid}",
+                verify=False
+                )
+            else:
+                print("Authentication failed. Check password or API URL.")
         except KeyError:
             time.sleep(1)
            # continue
@@ -124,11 +157,11 @@ def update(epd):
         draw_black.text((xt, top + 45), "Disk:",  font=font_bold, fill=fill_color)
         draw_black.text((xc, top + 45),  str(disk),  font=font, fill=fill_color)
         draw_black.text((xt, top + 60), "Ads Blocked: ", font=font_bold, fill=fill_color)
-#        draw_black.text((xc2, top + 60), str(adsblocked), font=font, fill=fill_color)
+        draw_black.text((xc2, top + 60), str(blocked), font=font, fill=fill_color)
         draw_black.text((xt, top + 75), "Clients:", font=font_bold, fill=fill_color)
- #       draw_black.text((xc2, top + 75), str(clients), font=font, fill=fill_color)
+        draw_black.text((xc2, top + 75), str(active_clients), font=font, fill=fill_color)
         draw_black.text((xt, top + 90), "DNS Queries: ", font=font_bold, fill=fill_color)
-  #      draw_black.text((xc2, top + 90), str(dnsqueries), font=font, fill=fill_color)
+        draw_black.text((xc2, top + 90), str(total_queries), font=font, fill=fill_color)
 
         draw_black.text((14, height - 10), u"↻: ", font=font, fill=fill_color)
         draw_black.text((24, height - 8), strftime("%H:%M", gmtime()), font=font_debug, fill=fill_color)
